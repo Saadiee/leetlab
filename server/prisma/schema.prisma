@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  username            String    @unique @db.VarChar(50) // Max 50 chars
+  password            String
+  email               String    @unique @db.VarChar(100) // Emails should be reasonably long
+  first_name          String?   @db.VarChar(50) // Optional
+  last_name           String?   @db.VarChar(50) // Optional
+  profile_picture_url String?   @db.VarChar(2048) // Max URL length
+  bio                 String?   @db.VarChar(500) // No limit, allows longer bios
+  role                UserRole  @default(USER)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  last_login          DateTime?
+}
