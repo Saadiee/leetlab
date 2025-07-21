@@ -16,6 +16,7 @@ import { db } from "../../lib/db";
 import { UserRole } from "../generated/prisma/index.js";
 
 const expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7; // 7 days
+
 export const register = async (c: Context) => {
   const { username, email, password } = await c.req.json();
   try {
@@ -50,6 +51,7 @@ export const register = async (c: Context) => {
     setCookie(c, "jwt", token, cookieOpts);
     return c.json(
       {
+        success: true,
         message: "user created successfully",
         id: newUser.id,
         username: newUser.username,
@@ -104,6 +106,7 @@ export const login = async (c: Context) => {
     setCookie(c, "jwt", token, cookieOpts);
     return c.json(
       {
+        success: true,
         message: "user loggedin successfully",
         id: user.id,
         username: user.username,
@@ -127,7 +130,21 @@ export const login = async (c: Context) => {
   }
 };
 
-export const logout = async (c: Context) => {};
+export const logout = async (c: Context) => {
+  try {
+    const cookieOpts: CookieOptions = {
+      httpOnly: true,
+      sameSite: "Strict",
+      secure: process.env.NODE_ENV !== "development",
+      path: "/",
+    };
+    deleteCookie(c, "jwt", cookieOpts);
+    return c.json({ success: true, message: "Logout successful" }, 200);
+  } catch (error) {
+    console.error("Logout Error:", error);
+    return c.json({ error: "Logout failed. Please try again later." }, 500);
+  }
+};
 
 export const check = async (c: Context) => {
   return c.text("Server running 🔥");
