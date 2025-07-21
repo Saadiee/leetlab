@@ -15,6 +15,7 @@ import { db } from "../../lib/db";
 // Generated files / types / enums
 import { UserRole } from "../generated/prisma/index.js";
 
+const expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7; // 7 days
 export const register = async (c: Context) => {
   const { username, email, password } = await c.req.json();
   try {
@@ -35,7 +36,7 @@ export const register = async (c: Context) => {
         role: UserRole.USER,
       },
     });
-    const expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7; // 7 days
+
     const token = await sign(
       { id: newUser.id, exp: expiry },
       process.env.JWT_SECRET!,
@@ -53,6 +54,7 @@ export const register = async (c: Context) => {
         id: newUser.id,
         username: newUser.username,
         role: newUser.role,
+        image_url: newUser.profile_picture_url,
       },
       201,
     );
@@ -74,7 +76,56 @@ export const register = async (c: Context) => {
   }
 };
 
-export const login = async (c: Context) => {};
+export const login = async (c: Context) => {
+  const { email, password } = await c.req.json();
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    if (!user) {
+      return c.json({ error: "User not found" }, 404);
+    }
+    const isPasswordMatch = await Bun.password.verify(password, user.password);
+    if (!isPasswordMatch) {
+      return c.json({ error: "Invalid email or password" }, 401);
+    }
+    const token = await sign(
+      { id: user.id, exp: expiry },
+      process.env.JWT_SECRET!,
+    );
+    const cookieOpts: CookieOptions = {
+      httpOnly: true,
+      sameSite: "Strict",
+      secure: process.env.NODE_ENV !== "development",
+      maxAge: 604800,
+    };
+    setCookie(c, "jwt", token, cookieOpts);
+    return c.json(
+      {
+        message: "user loggedin successfully",
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        image_url: user.profile_picture_url,
+      },
+      200,
+    );
+  } catch (error) {
+    console.error("Sign-in Error:", error);
+    // Handle Prisma known error (e.g., DB issues like P2025: Record not found)
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return c.json({ error: "User not found" }, 404);
+      }
+    }
+    return c.json(
+      { error: "Something went wrong during sign-in. Please try again." },
+      500,
+    );
+  }
+};
 
 export const logout = async (c: Context) => {};
 
