@@ -147,6 +147,9 @@ export const logout = async (c: Context) => {
 };
 
 export const check = async (c: Context) => {
-  return c.text("Server running 🔥");
-  console.log(db);
+  const user = c.get("user");
+  return c.json(
+    { success: true, message: "User authentication successfull", user },
+    200,
+  );
 };
