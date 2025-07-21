@@ -25,8 +25,11 @@ The backend is built with Hono.js and provides a RESTful API for the LeetLab app
 
 -   User registration (`/api/v1/auth/register`)
 -   User login with JWT authentication (`/api/v1/auth/login`)
+-   User logout (`/api/v1/auth/logout`)
+-   Protected route to check user status (`/api/v1/auth/check`)
 -   Password hashing using Bun's built-in tools.
 -   Cookie-based session management.
+-   Authentication middleware to protect routes.
 
 #### Planned Features
 
@@ -44,6 +47,14 @@ The backend is built with Hono.js and provides a RESTful API for the LeetLab app
 -   **ORM:** [Prisma](https://www.prisma.io/) - A next-generation ORM for Node.js and TypeScript.
 -   **Runtime:** [Bun](https://bun.sh/) - A fast all-in-one JavaScript runtime.
 -   **Language:** [TypeScript](https://www.typescriptlang.org/)
+
+### Middleware
+
+#### Authentication (`auth.middleware.ts`)
+
+-   This middleware protects designated routes by verifying a JWT token sent in an HTTP-only cookie (`jwt`).
+-   If the token is valid, it fetches the corresponding user's data from the database and attaches it to the request context for use in subsequent controllers.
+-   If the token is missing or invalid, it returns a `401 Unauthorized` response, preventing access to the protected endpoint.
 
 ### Getting Started
 
@@ -123,11 +134,15 @@ The backend is built with Hono.js and provides a RESTful API for the LeetLab app
 
 -   **`POST /api/v1/auth/logout`**
 
-    (Not yet implemented) Logs out the user and clears the session cookie.
+    Logs out the currently authenticated user by clearing the session cookie.
+
+    **Requires Authentication:** Yes
 
 -   **`GET /api/v1/auth/check`**
 
-    A simple endpoint to check if the server is running.
+    Checks the authentication status of the current user. If the user is authenticated (i.e., has a valid `jwt` cookie), it returns the user's information.
+
+    **Requires Authentication:** Yes
 
 ---
 
