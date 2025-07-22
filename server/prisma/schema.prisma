@@ -13,6 +13,12 @@ enum UserRole {
   USER
 }
 
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
 model User {
   id                  String    @id @default(uuid())
   username            String    @unique @db.VarChar(50) // Max 50 chars
@@ -26,4 +32,28 @@ model User {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   last_login          DateTime?
+  Problems            Problem[]
+}
+
+model Problem {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  difficulty  Difficulty
+  tags        String[]
+  userId      String
+  examples    Json
+  constraints String
+  hints       String?
+  editorial   String?
+
+  testcases          Json
+  codeSnippets       Json
+  referenceSolutions String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // RelationShips
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
