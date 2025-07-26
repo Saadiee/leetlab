@@ -1,4 +1,4 @@
-import { rateLimiter } from "../lib/rateLimiter";
+import { rateLimiter } from "../../lib/rateLimiter";
 import { MiddlewareHandler } from "hono";
 
 export const redisRateLimit: MiddlewareHandler = async (c, next) => {
