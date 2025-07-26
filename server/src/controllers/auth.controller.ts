@@ -1,13 +1,7 @@
 // External libraries
 import { Context } from "hono";
 import { sign } from "hono/jwt";
-import {
-  getCookie,
-  getSignedCookie,
-  setCookie,
-  setSignedCookie,
-  deleteCookie,
-} from "hono/cookie";
+import { setCookie, deleteCookie } from "hono/cookie";
 import { CookieOptions } from "hono/utils/cookie";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 // Internal/shared libraries
