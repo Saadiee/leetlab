@@ -87,7 +87,7 @@ export const login = async (c: Context) => {
       },
     });
     if (!user) {
-      return c.json({ error: "User not found" }, 404);
+      return c.json({ error: "Invalid email or password" }, 401);
     }
     const isPasswordMatch = await Bun.password.verify(password, user.password);
     if (!isPasswordMatch) {
