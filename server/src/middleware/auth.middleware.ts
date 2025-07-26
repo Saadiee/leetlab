@@ -2,7 +2,7 @@ import { Context, Next } from "hono";
 import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import { db } from "../../lib/db";
-import { DecodedToken } from "../types";
+import { DecodedToken, User } from "../types";
 
 export const authMiddleware = async (c: Context, next: Next) => {
   try {
@@ -49,5 +49,18 @@ export const authMiddleware = async (c: Context, next: Next) => {
   } catch (error) {
     console.error("Auth Middleware Error:", error);
     return c.json({ message: "Internal server error in auth middleware" }, 500);
+  }
+};
+
+export const checkAdmin = async (c: Context, next: Next) => {
+  try {
+    const user: User = c.get("user");
+    if (!user || user.role !== "ADMIN") {
+      return c.json({ message: "Access denied. Admin only" }, 403);
+    }
+    next();
+  } catch (error) {
+    console.log("Error checking admin role", error);
+    return c.json({ message: "Error checking admin role" }, 500);
   }
 };
