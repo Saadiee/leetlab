@@ -5,6 +5,7 @@ export type DecodedToken = {
 };
 
 export type User = {
+  id: string;
   username: string;
   email: string;
   first_name: string | null;

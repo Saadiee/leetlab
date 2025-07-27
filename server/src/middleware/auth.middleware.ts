@@ -32,6 +32,7 @@ export const authMiddleware = async (c: Context, next: Next) => {
         id: decodedToken.id,
       },
       select: {
+        id: true,
         email: true,
         username: true,
         first_name: true,
