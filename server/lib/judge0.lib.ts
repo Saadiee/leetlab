@@ -31,3 +31,30 @@ export const submitBatch = async (
   );
   return data;
 };
+
+const sleep = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const poolBatchResults = async (
+  tokens: string[],
+): Promise<Judge0Result[]> => {
+  while (true) {
+    const { data } = await axios.get(
+      `${process.env.JUDGE0_API_URL}/submissions/batch`,
+      {
+        params: {
+          tokens: tokens.join(","),
+          base64_encoded: false,
+        },
+      },
+    );
+    const results = data.submissions;
+    const isAllDone: Boolean = results.every(
+      (result: Judge0Result) =>
+        result.status_id !== 1 && result.status_id !== 2,
+    );
+    if (isAllDone) return results;
+    await sleep(1000);
+  }
+};
